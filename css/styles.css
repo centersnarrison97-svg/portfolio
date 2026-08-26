@@ -21,6 +21,14 @@
   --accent-soft: rgba(29, 155, 240, 0.12);
   --like: #f91880;                 /* X's like pink */
   --like-soft: rgba(249, 24, 128, 0.12);
+  --green: #00ba7c;                /* X's extended palette, tuned for this bg */
+  --green-soft: rgba(0, 186, 124, 0.12);
+  --gold: #e8c547;
+  --gold-soft: rgba(232, 197, 71, 0.12);
+  --purple: #8b6fff;
+  --purple-soft: rgba(139, 111, 255, 0.12);
+  --crimson: #e04a63;              /* IU-adjacent red, readable on dark */
+  --crimson-soft: rgba(224, 74, 99, 0.12);
   --header-blur: rgba(10, 13, 18, 0.78);
 
   --radius-card: 16px;
@@ -186,6 +194,10 @@ a:hover { text-decoration: underline; }
   width: 20px; height: 20px; flex-shrink: 0;
   color: var(--accent);
 }
+#experience .section-header-icon { color: var(--gold); }
+#builds .section-header-icon { color: var(--green); }
+#writing .section-header-icon { color: var(--like); }
+#credentials .section-header-icon { color: var(--purple); }
 .section-sub {
   margin: 0; font-size: 13px; color: var(--text-secondary);
 }
@@ -263,6 +275,11 @@ a:hover { text-decoration: underline; }
 }
 .org-avatar-muted { color: var(--text-secondary); }
 .org-avatar-accent { background: var(--accent-soft); }
+.org-crimson { color: var(--crimson); background: var(--crimson-soft); }
+.org-green { color: var(--green); background: var(--green-soft); }
+.org-purple { color: var(--purple); background: var(--purple-soft); }
+.org-gold { color: var(--gold); background: var(--gold-soft); }
+.org-pink { color: var(--like); background: var(--like-soft); }
 .org-avatar .icon { width: 18px; height: 18px; }
 
 .card-head {
@@ -461,8 +478,20 @@ a.action:hover { text-decoration: none; }
 .widget-list { list-style: none; margin: 0; padding: 4px 0; }
 .widget-list li {
   display: flex; flex-direction: column;
+  position: relative;
   padding: 8px 16px; line-height: 1.35;
 }
+.widget-trends li { padding-left: 30px; }
+.widget-trends li::before {
+  content: ""; position: absolute;
+  left: 16px; top: 15px;
+  width: 6px; height: 6px; border-radius: var(--radius-full);
+  background: var(--accent);
+}
+.trend-gold::before { background: var(--gold); }
+.trend-green::before { background: var(--green); }
+.trend-purple::before { background: var(--purple); }
+.trend-pink::before { background: var(--like); }
 .widget-item-main { font-weight: 700; font-size: 15px; }
 .widget-item-sub { color: var(--text-secondary); font-size: 13px; }
 
