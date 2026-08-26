@@ -1,9 +1,14 @@
 /* Progressive enhancement only — the site is fully usable without this file.
    1. Scrollspy: highlights the active section in the side nav and mobile tabs.
-   2. Copy-email button (revealed only when the Clipboard API is available). */
+   2. Copy-email button and per-card copy-link buttons (revealed only when the
+      Clipboard API is available).
+   3. Local "like" hearts (stored in this browser only, never sent anywhere).
+   4. Rail search: live-filters the timeline cards. */
 
 (function () {
   "use strict";
+
+  var copyStatus = document.getElementById("copy-status");
 
   /* ---------- scrollspy ---------- */
 
@@ -36,11 +41,11 @@
     var current = sections[0].id;
 
     // Landing on a #fragment scrolls before this script runs — sync up front.
+    // Fragments may target a card; attribute them to the enclosing section.
     if (location.hash) {
-      var target = location.hash.slice(1);
-      if (sections.some(function (s) { return s.id === target; })) {
-        current = target;
-      }
+      var target = document.getElementById(location.hash.slice(1));
+      var enclosing = target && target.closest("main section[id]");
+      if (enclosing) current = enclosing.id;
     }
     if (atBottom()) current = lastId;
     setActive(current);
@@ -70,33 +75,129 @@
     }, { passive: true });
   }
 
-  /* ---------- copy email ---------- */
+  /* ---------- clipboard: copy email + per-card copy link ---------- */
 
-  var copyBtn = document.querySelector(".btn-copy");
-  var copyStatus = document.getElementById("copy-status");
+  function announce(message) {
+    if (copyStatus) copyStatus.textContent = message;
+  }
 
-  if (copyBtn && navigator.clipboard) {
-    copyBtn.hidden = false;
-    var resetTimer = null;
-    copyBtn.addEventListener("click", function () {
-      navigator.clipboard.writeText(copyBtn.getAttribute("data-copy")).then(
-        function () {
-          var label = copyBtn.querySelector(".btn-copy-label");
-          if (resetTimer) clearTimeout(resetTimer);
-          copyBtn.classList.add("copied");
-          label.textContent = "Copied";
-          if (copyStatus) copyStatus.textContent = "Email address copied";
-          resetTimer = setTimeout(function () {
-            copyBtn.classList.remove("copied");
-            label.textContent = "Copy";
-            if (copyStatus) copyStatus.textContent = "";
-            resetTimer = null;
-          }, 1800);
-        },
-        function () {
-          /* Clipboard refused — the address is selectable text anyway. */
-        }
-      );
+  if (navigator.clipboard) {
+    var copyBtn = document.querySelector(".btn-copy");
+    if (copyBtn) {
+      copyBtn.hidden = false;
+      var resetTimer = null;
+      copyBtn.addEventListener("click", function () {
+        navigator.clipboard.writeText(copyBtn.getAttribute("data-copy")).then(
+          function () {
+            var label = copyBtn.querySelector(".btn-copy-label");
+            if (resetTimer) clearTimeout(resetTimer);
+            copyBtn.classList.add("copied");
+            label.textContent = "Copied";
+            announce("Email address copied");
+            resetTimer = setTimeout(function () {
+              copyBtn.classList.remove("copied");
+              label.textContent = "Copy";
+              announce("");
+              resetTimer = null;
+            }, 1800);
+          },
+          function () {
+            /* Clipboard refused — the address is selectable text anyway. */
+          }
+        );
+      });
+    }
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".action-share"),
+      function (btn) {
+        btn.hidden = false;
+        var doneTimer = null;
+        btn.addEventListener("click", function () {
+          var url =
+            location.origin + location.pathname +
+            "#" + btn.getAttribute("data-share");
+          navigator.clipboard.writeText(url).then(
+            function () {
+              if (doneTimer) clearTimeout(doneTimer);
+              btn.classList.add("done");
+              announce("Link copied");
+              doneTimer = setTimeout(function () {
+                btn.classList.remove("done");
+                announce("");
+                doneTimer = null;
+              }, 1500);
+            },
+            function () {}
+          );
+        });
+      }
+    );
+  }
+
+  /* ---------- likes (localStorage, this browser only) ---------- */
+
+  var LIKE_KEY = "hr-likes";
+
+  function readLikes() {
+    try {
+      return JSON.parse(localStorage.getItem(LIKE_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  var likeBtns = document.querySelectorAll(".action-like");
+  if (likeBtns.length) {
+    var storageOk = false;
+    try {
+      localStorage.setItem("__hr_t", "1");
+      localStorage.removeItem("__hr_t");
+      storageOk = true;
+    } catch (e) { /* storage blocked — hearts stay hidden */ }
+
+    if (storageOk) {
+      var liked = readLikes();
+      Array.prototype.forEach.call(likeBtns, function (btn) {
+        btn.hidden = false;
+        var id = btn.getAttribute("data-like");
+        if (liked.indexOf(id) > -1) btn.setAttribute("aria-pressed", "true");
+        btn.addEventListener("click", function () {
+          var list = readLikes();
+          var i = list.indexOf(id);
+          var on = i === -1;
+          if (on) list.push(id); else list.splice(i, 1);
+          try {
+            localStorage.setItem(LIKE_KEY, JSON.stringify(list));
+          } catch (e) { /* full/blocked — still reflect the tap visually */ }
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+      });
+    }
+  }
+
+  /* ---------- rail search ---------- */
+
+  var searchInput = document.getElementById("site-search");
+  if (searchInput) {
+    var cards = Array.prototype.slice.call(
+      document.querySelectorAll("main .card")
+    );
+    var emptyNote = document.getElementById("search-empty");
+
+    searchInput.addEventListener("input", function () {
+      var q = searchInput.value.trim().toLowerCase();
+      var hits = 0;
+      cards.forEach(function (card) {
+        var show = !q || card.textContent.toLowerCase().indexOf(q) > -1;
+        card.classList.toggle("search-hide", !show);
+        if (show) hits++;
+      });
+      if (emptyNote) {
+        emptyNote.hidden = !q || hits > 0;
+        var qSpan = emptyNote.querySelector("span");
+        if (qSpan) qSpan.textContent = searchInput.value.trim();
+      }
     });
   }
 })();

@@ -18,6 +18,8 @@
   --accent-cta: #1c95e8;           /* button fill: ≥3:1 with white at large-text size */
   --accent-hover: #1a8cd8;
   --accent-soft: rgba(29, 155, 240, 0.12);
+  --like: #f91880;                 /* X's like pink */
+  --like-soft: rgba(249, 24, 128, 0.12);
   --header-blur: rgba(10, 13, 18, 0.78);
 
   --radius-card: 16px;
@@ -283,6 +285,39 @@ a:hover { text-decoration: underline; }
 
 .quiet { color: var(--text-secondary); }
 
+.points + .tags { margin-top: 10px; }
+
+/* ---------- card action rows ---------- */
+
+.card-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 260px;
+  margin: 4px 0 0 -8px;
+}
+.action {
+  display: inline-flex; align-items: center;
+  background: none; border: 0; padding: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+a.action:hover { text-decoration: none; }
+.action-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px;
+  border-radius: var(--radius-full);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.action .icon { width: 19px; height: 19px; }
+.action-reply:hover, .action-reply:focus-visible,
+.action-share:hover, .action-share:focus-visible,
+.action-share.done { color: var(--accent); }
+.action-reply:hover .action-ico, .action-share:hover .action-ico,
+.action-share.done .action-ico { background: var(--accent-soft); }
+.action-like:hover, .action-like:focus-visible,
+.action-like[aria-pressed="true"] { color: var(--like); }
+.action-like:hover .action-ico { background: var(--like-soft); }
+.action-like[aria-pressed="true"] .icon { fill: var(--like); }
+
 /* ---------- contact ---------- */
 
 .contact-card { display: block; }
@@ -322,6 +357,38 @@ a:hover { text-decoration: underline; }
   color: var(--text-secondary); font-size: 13px;
 }
 .page-footer p { margin: 0; }
+
+/* ---------- search (right rail) ---------- */
+
+.rail-search {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  padding: 6px 0 10px 0;
+}
+.search-box {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  padding: 11px 16px;
+  cursor: text;
+}
+.search-box:focus-within {
+  background: var(--bg);
+  border-color: var(--accent);
+}
+.icon-search { width: 18px; height: 18px; color: var(--text-secondary); }
+.search-box:focus-within .icon-search { color: var(--accent); }
+.search-box input {
+  flex: 1; min-width: 0;
+  background: none; border: 0; outline: none;
+  color: var(--text);
+  font-family: var(--font); font-size: 15px;
+}
+.search-box input::placeholder { color: var(--text-secondary); }
+
+.card.search-hide { display: none; }
+.search-empty { padding: 24px 16px; color: var(--text-secondary); }
 
 /* ---------- right rail ---------- */
 
@@ -432,7 +499,8 @@ a:hover { text-decoration: underline; }
 
 @media print {
   body { background: #fff; color: #000; font-size: 12pt; }
-  .sidenav, .rail, .tabbar, .skip-link, .btn-copy, .banner { display: none; }
+  .sidenav, .rail, .tabbar, .skip-link, .btn-copy, .banner,
+  .card-actions, .search-empty { display: none; }
   .timeline { border: 0; max-width: 100%; }
   .section-header {
     position: static; background: none;
