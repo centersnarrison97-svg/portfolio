@@ -322,6 +322,48 @@ a:hover { text-decoration: underline; }
 
 /* ---------- card media (diagram attachments) ---------- */
 
+/* ---------- motion (html.anim is set by JS only when IntersectionObserver
+   exists AND the user has no reduced-motion preference — so with JS off,
+   old browsers, or reduce on, everything below is inert and fully visible) */
+
+.card.will-anim {
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.card.will-anim.in { opacity: 1; transform: none; }
+
+.anim .card-media .draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.anim .card-media.in .draw {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.9s ease 0.1s;
+}
+.anim .card-media .draw-fill { opacity: 0; }
+.anim .card-media.in .draw-fill {
+  opacity: 1;
+  transition: opacity 0.4s ease 0.85s;
+}
+
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35); }
+  60% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+@keyframes like-ring {
+  0% { box-shadow: 0 0 0 0 rgba(249, 24, 128, 0.45); }
+  100% { box-shadow: 0 0 0 14px rgba(249, 24, 128, 0); }
+}
+.action-like.pop .icon { animation: heart-pop 0.45s ease; }
+.action-like.pop .action-ico { animation: like-ring 0.5s ease; }
+
+.btn-primary, .btn-secondary {
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.btn-primary:hover, .btn-secondary:hover { transform: translateY(-1px); }
+.nav-link .icon, .logo img { transition: transform 0.15s ease; }
+.nav-link:hover .icon { transform: scale(1.08); }
+.logo:hover img { transform: scale(1.06); }
+
 .points + .card-media { margin-top: 12px; }
 .card-media {
   margin: 4px 0 12px 0;
@@ -588,7 +630,8 @@ a.action:hover { text-decoration: none; }
   .btn-primary, .btn-secondary {
     background: none; color: #000; border: 1px solid #000;
   }
-  .card { border-bottom: 1px solid #ccc; break-inside: avoid; }
+  .card { border-bottom: 1px solid #ccc; break-inside: avoid;
+          opacity: 1 !important; transform: none !important; }
   .card:hover { background: none; }
   .org-avatar { display: none; }
   .avatar-xl { display: none; }

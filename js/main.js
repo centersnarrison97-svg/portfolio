@@ -8,6 +8,11 @@
 (function () {
   "use strict";
 
+  var reduceMotion = !!(
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+
   /* ---------- shared live-region announcer ---------- */
 
   var copyStatus = document.getElementById("copy-status");
@@ -190,6 +195,10 @@
             localStorage.setItem(LIKE_KEY, JSON.stringify(liked));
           } catch (e) { /* write lost, but the visible state stays truthful */ }
           btn.setAttribute("aria-pressed", on ? "true" : "false");
+          if (on && !reduceMotion) {
+            btn.classList.add("pop");
+            setTimeout(function () { btn.classList.remove("pop"); }, 500);
+          }
         });
       });
     }
@@ -247,5 +256,38 @@
         }, 300);
       }
     });
+  }
+
+  /* ---------- entrance + diagram-draw animations ----------
+     Gated so nothing is ever hidden unless BOTH IntersectionObserver exists
+     and the user has no reduced-motion preference. */
+
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("anim");
+
+    var animTargets = [];
+    Array.prototype.forEach.call(
+      document.querySelectorAll("main .card"),
+      function (card) {
+        if (card.getBoundingClientRect().top > window.innerHeight) {
+          card.classList.add("will-anim");
+          animTargets.push(card);
+        }
+      }
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".card-media"),
+      function (fig) { animTargets.push(fig); }
+    );
+
+    var animIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in");
+          animIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    animTargets.forEach(function (t) { animIO.observe(t); });
   }
 })();
