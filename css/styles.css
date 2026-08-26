@@ -322,6 +322,7 @@ a:hover { text-decoration: underline; }
 
 /* ---------- card media (diagram attachments) ---------- */
 
+.points + .card-media { margin-top: 12px; }
 .card-media {
   margin: 4px 0 12px 0;
   border: 1px solid var(--border);
