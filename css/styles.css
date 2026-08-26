@@ -6,6 +6,7 @@
    ========================================================================== */
 
 :root {
+  color-scheme: dark;              /* native widgets (search clear, scrollbars) render dark */
   --bg: #0a0d12;
   --bg-elevated: #131720;          /* right-rail widgets */
   --bg-hover: rgba(231, 233, 234, 0.04);
@@ -36,6 +37,10 @@
 /* ---------- reset & base ---------- */
 
 *, *::before, *::after { box-sizing: border-box; }
+
+/* Author display rules would otherwise defeat the hidden attribute — JS-gated
+   controls (like/share/copy buttons) rely on it. */
+[hidden] { display: none !important; }
 
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
@@ -387,7 +392,7 @@ a.action:hover { text-decoration: none; }
 }
 .search-box input::placeholder { color: var(--text-secondary); }
 
-.card.search-hide { display: none; }
+.search-hide { display: none; }  /* applied to filtered-out cards AND emptied sections */
 .search-empty { padding: 24px 16px; color: var(--text-secondary); }
 
 /* ---------- right rail ---------- */
