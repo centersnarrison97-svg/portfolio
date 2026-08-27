@@ -308,4 +308,124 @@
     }, { threshold: 0.15 });
     animTargets.forEach(function (t) { animIO.observe(t); });
   }
+
+  /* ---------- banner: terminal typing, cursor glow, click surge ----------
+     Without JS or with reduced motion, the banner shows the full terminal
+     text and its static art; everything here only enhances. */
+
+  var bnSvg = document.getElementById("banner-svg");
+  if (bnSvg && !reduceMotion) {
+
+    /* terminal typing loop */
+    var term = document.getElementById("bn-term");
+    var tcur = document.getElementById("bn-tcur");
+    if (term && tcur) {
+      var termLines = Array.prototype.slice.call(term.querySelectorAll("text.bn-t"));
+      var seq = [];
+      termLines.forEach(function (line) {
+        Array.prototype.forEach.call(line.querySelectorAll(".bn-cmd"), function (ts) {
+          seq.push({ line: line, ts: ts, full: ts.textContent });
+        });
+      });
+      var curTo = function (line) {
+        tcur.setAttribute("x", 500 + line.getComputedTextLength() + 4);
+        tcur.setAttribute("y", parseFloat(line.getAttribute("y")) - 22);
+      };
+      var si = 0, ci = 0;
+      var typeStep = function () {
+        if (si >= seq.length) {
+          setTimeout(function () {
+            seq.forEach(function (s) { s.ts.textContent = ""; });
+            si = 0; ci = 0;
+            curTo(seq[0].line);
+            setTimeout(typeStep, 700);
+          }, 3800);
+          return;
+        }
+        var s = seq[si];
+        ci++;
+        s.ts.textContent = s.full.slice(0, ci);
+        curTo(s.line);
+        if (ci >= s.full.length) {
+          var startedNewLine = si + 1 < seq.length && seq[si + 1].line !== s.line;
+          si++; ci = 0;
+          setTimeout(typeStep, startedNewLine ? 500 : 60);
+        } else {
+          setTimeout(typeStep, 70 + Math.random() * 60);
+        }
+      };
+      seq.forEach(function (s) { s.ts.textContent = ""; });
+      curTo(seq[0].line);
+      setTimeout(typeStep, 900);
+    }
+
+    /* cursor-follow glow + node proximity */
+    var cgEl = document.getElementById("bn-cg");
+    var bnNodes = Array.prototype.slice.call(
+      document.querySelectorAll("#bn-nodes circle")
+    );
+    var bmx = 750, bmy = 250, btx = 750, bty = 250, bAct = false, bRaf = false;
+    function bnLoop() {
+      bmx += (btx - bmx) * 0.12;
+      bmy += (bty - bmy) * 0.12;
+      cgEl.setAttribute("cx", bmx);
+      cgEl.setAttribute("cy", bmy);
+      bnNodes.forEach(function (n) {
+        var d = Math.hypot(n.cx.baseVal.value - bmx, n.cy.baseVal.value - bmy);
+        n.setAttribute("r", bAct && d < 180 ? 4 + (1 - d / 180) * 3.5 : 4);
+      });
+      if (bAct || Math.abs(btx - bmx) > 1) {
+        requestAnimationFrame(bnLoop);
+      } else {
+        bRaf = false;
+      }
+    }
+    bnSvg.addEventListener("mousemove", function (e) {
+      var r = bnSvg.getBoundingClientRect();
+      btx = (e.clientX - r.left) / r.width * 1500;
+      bty = (e.clientY - r.top) / r.height * 500;
+      bAct = true;
+      cgEl.setAttribute("opacity", "1");
+      if (!bRaf) { bRaf = true; requestAnimationFrame(bnLoop); }
+    });
+    bnSvg.addEventListener("mouseleave", function () {
+      bAct = false;
+      cgEl.setAttribute("opacity", "0");
+    });
+
+    /* click: ripple at the point, bright surge through the circuit,
+       brackets flash in typed sequence when the surge arrives */
+    var bnKeys = document.getElementById("bn-keys");
+    var surge1 = document.getElementById("bn-sm1");
+    var surge2 = document.getElementById("bn-sm2");
+    bnSvg.addEventListener("click", function (e) {
+      var r = bnSvg.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width * 1500;
+      var y = (e.clientY - r.top) / r.height * 500;
+      var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 0);
+      c.setAttribute("fill", "none");
+      c.setAttribute("stroke", "#1d9bf0");
+      c.setAttribute("stroke-width", 2.5);
+      bnSvg.appendChild(c);
+      if (c.animate) {
+        c.animate(
+          [{ r: "0px", opacity: 0.7 }, { r: "150px", opacity: 0 }],
+          { duration: 700, easing: "ease-out" }
+        ).onfinish = function () { c.remove(); };
+      } else {
+        c.remove();
+      }
+      if (surge1 && surge1.beginElement) {
+        try { surge1.beginElement(); surge2.beginElement(); } catch (err) {}
+      }
+      if (bnKeys) {
+        setTimeout(function () {
+          bnKeys.classList.remove("typed");
+          void bnKeys.getBoundingClientRect(); /* restart the animation */
+          bnKeys.classList.add("typed");
+        }, 1000);
+      }
+    });
+  }
 })();
