@@ -327,6 +327,26 @@
           seq.push({ line: line, ts: ts, full: ts.textContent });
         });
       });
+      // The for loop rotates each typing cycle: [header line, body line].
+      var LOOP_VARIANTS = [
+        ["for field in (law, software):", "    ship(field)"],
+        ["for clause in agreement:", "    redline(clause)"],
+        ["for reg in (gdpr, eu_ai_act):", "    comply(reg)"],
+        ["for claim in patent.claims:", "    draft(claim)"],
+        ["for bug in code:", "    fix(bug)"]
+      ];
+      var loopSegs = seq.filter(function (s) {
+        return s.line === termLines[termLines.length - 2] ||
+               s.line === termLines[termLines.length - 1];
+      });
+      var vi = Math.floor(Math.random() * LOOP_VARIANTS.length);
+      var applyVariant = function () {
+        var v = LOOP_VARIANTS[vi % LOOP_VARIANTS.length];
+        vi++;
+        if (loopSegs[0]) loopSegs[0].full = v[0];
+        if (loopSegs[1]) loopSegs[1].full = v[1];
+      };
+      applyVariant();
       var curTo = function (line) {
         tcur.setAttribute("x", 500 + line.getComputedTextLength() + 4);
         tcur.setAttribute("y", parseFloat(line.getAttribute("y")) - 22);
@@ -336,6 +356,7 @@
         if (si >= seq.length) {
           setTimeout(function () {
             seq.forEach(function (s) { s.ts.textContent = ""; });
+            applyVariant();
             si = 0; ci = 0;
             curTo(seq[0].line);
             setTimeout(typeStep, 700);
