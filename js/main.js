@@ -41,7 +41,11 @@
     document.querySelectorAll("[data-section]")
   );
 
+  var lastActiveId = null;
+
   function setActive(id) {
+    if (id === lastActiveId) return;
+    lastActiveId = id;
     links.forEach(function (link) {
       if (link.getAttribute("data-section") === id) {
         link.setAttribute("aria-current", "location");
@@ -49,6 +53,14 @@
         link.removeAttribute("aria-current");
       }
     });
+    if (document.documentElement.classList.contains("anim")) {
+      var icon = document.querySelector("#" + id + " .section-header-icon");
+      if (icon) {
+        icon.classList.remove("tick");
+        void icon.offsetWidth; /* restart the animation */
+        icon.classList.add("tick");
+      }
+    }
   }
 
   // True only when the page scrolls AND we're at its end — a page shortened
@@ -281,8 +293,14 @@
     );
 
     var animIO = new IntersectionObserver(function (entries) {
+      var batch = 0;
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
+          // Cards arriving in the same scroll burst cascade slightly.
+          if (entry.target.classList.contains("will-anim")) {
+            entry.target.style.transitionDelay = (batch * 80) + "ms";
+            batch++;
+          }
           entry.target.classList.add("in");
           animIO.unobserve(entry.target);
         }

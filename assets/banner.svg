@@ -20,10 +20,32 @@
       @media (prefers-reduced-motion: no-preference) {
         #g1 { animation: driftA 26s ease-in-out infinite alternate; }
         #g2 { animation: driftB 32s ease-in-out infinite alternate; }
+        #rock {
+          transform-box: fill-box; transform-origin: 50% 12%;
+          animation: rock 9s ease-in-out infinite alternate;
+        }
+        #brackets { animation: breathe 6s ease-in-out infinite alternate; }
+        #nodes circle { animation: nodeglow 4s ease-in-out infinite alternate; }
+        #nodes circle:nth-child(2) { animation-delay: 0.5s; }
+        #nodes circle:nth-child(3) { animation-delay: 1s; }
+        #nodes circle:nth-child(4) { animation-delay: 1.5s; }
+        #nodes circle:nth-child(5) { animation-delay: 2s; }
+        #nodes circle:nth-child(6) { animation-delay: 2.5s; }
+        #nodes circle:nth-child(7) { animation-delay: 3s; }
+        #tw circle { animation: twinkle 3.6s ease-in-out infinite alternate; }
+        #tw circle:nth-child(2) { animation-delay: 0.7s; }
+        #tw circle:nth-child(3) { animation-delay: 1.3s; }
+        #tw circle:nth-child(4) { animation-delay: 1.9s; }
+        #tw circle:nth-child(5) { animation-delay: 2.6s; }
+        #tw circle:nth-child(6) { animation-delay: 3.1s; }
       }
-      @media (prefers-reduced-motion: reduce) { #pulse { display: none; } }
+      @media (prefers-reduced-motion: reduce) { .pulse { display: none; } }
       @keyframes driftA { from { transform: translate(0,0); } to { transform: translate(-70px,30px); } }
       @keyframes driftB { from { transform: translate(0,0); } to { transform: translate(60px,-25px); } }
+      @keyframes rock { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+      @keyframes breathe { from { opacity: 0.22; } to { opacity: 0.42; } }
+      @keyframes nodeglow { from { opacity: 0.22; } to { opacity: 0.6; } }
+      @keyframes twinkle { from { opacity: 0.07; } to { opacity: 0.4; } }
     </style>
   </defs>
   <rect width="1500" height="500" fill="url(#base)"/>
@@ -31,18 +53,30 @@
   <rect id="g1" x="-120" y="-120" width="1740" height="740" fill="url(#glow)"/>
   <rect id="g2" x="-120" y="-120" width="1740" height="740" fill="url(#warm)"/>
 
-  <!-- scales of justice, left -->
-  <g transform="translate(180,140) scale(9)" fill="none" stroke="#e8c547" stroke-width="1.4"
-     stroke-linecap="round" stroke-linejoin="round" opacity="0.28">
-    <line x1="12" y1="4" x2="12" y2="20"/>
-    <line x1="4" y1="7" x2="20" y2="7"/>
-    <path d="M6.5 7 4 12.5h5L6.5 7Z"/>
-    <path d="M17.5 7 15 12.5h5L17.5 7Z"/>
-    <line x1="8.5" y1="20" x2="15.5" y2="20"/>
+  <!-- twinkling field -->
+  <g id="tw" fill="#e7e9ea" opacity="1">
+    <circle cx="150" cy="80" r="2" opacity="0.12"/>
+    <circle cx="700" cy="90" r="1.8" opacity="0.12"/>
+    <circle cx="900" cy="400" r="2" opacity="0.12"/>
+    <circle cx="1300" cy="320" r="1.8" opacity="0.12"/>
+    <circle cx="500" cy="420" r="1.6" opacity="0.12"/>
+    <circle cx="1150" cy="120" r="2" opacity="0.12"/>
   </g>
 
-  <!-- code brackets, right -->
-  <text x="1030" y="330" font-family="Consolas, 'Courier New', monospace" font-size="220"
+  <!-- scales of justice, left (gently rocking) -->
+  <g transform="translate(180,140) scale(9)" fill="none" stroke="#e8c547" stroke-width="1.4"
+     stroke-linecap="round" stroke-linejoin="round" opacity="0.28">
+    <g id="rock">
+      <line x1="12" y1="4" x2="12" y2="20"/>
+      <line x1="4" y1="7" x2="20" y2="7"/>
+      <path d="M6.5 7 4 12.5h5L6.5 7Z"/>
+      <path d="M17.5 7 15 12.5h5L17.5 7Z"/>
+      <line x1="8.5" y1="20" x2="15.5" y2="20"/>
+    </g>
+  </g>
+
+  <!-- code brackets, right (breathing) -->
+  <text id="brackets" x="1030" y="330" font-family="Consolas, 'Courier New', monospace" font-size="220"
         font-weight="700" fill="none" stroke="#1d9bf0" stroke-width="2" opacity="0.3">&lt;/&gt;</text>
 
   <!-- circuit traces -->
@@ -51,17 +85,25 @@
     <path d="M410 260 H600 V310 H1000" opacity="0.18"/>
     <path d="M410 230 H520" opacity="0.15"/>
   </g>
-  <g fill="#1d9bf0" opacity="0.35">
-    <circle cx="640" cy="200" r="4"/>
-    <circle cx="640" cy="160" r="4"/>
-    <circle cx="600" cy="260" r="4"/>
-    <circle cx="600" cy="310" r="4"/>
-    <circle cx="520" cy="230" r="4"/>
-    <circle cx="1010" cy="160" r="4"/>
-    <circle cx="1000" cy="310" r="4"/>
+  <g id="nodes" fill="#1d9bf0">
+    <circle cx="640" cy="200" r="4" opacity="0.35"/>
+    <circle cx="640" cy="160" r="4" opacity="0.35"/>
+    <circle cx="600" cy="260" r="4" opacity="0.35"/>
+    <circle cx="600" cy="310" r="4" opacity="0.35"/>
+    <circle cx="520" cy="230" r="4" opacity="0.35"/>
+    <circle cx="1010" cy="160" r="4" opacity="0.35"/>
+    <circle cx="1000" cy="310" r="4" opacity="0.35"/>
   </g>
-  <circle id="pulse" r="4" fill="#1d9bf0" opacity="0.8">
+
+  <!-- traveling pulses: two blue (one each way), one gold on the short law-side trace -->
+  <circle class="pulse" r="4" fill="#1d9bf0" opacity="0.8">
     <animateMotion dur="7s" repeatCount="indefinite" path="M410 200 H640 V160 H1010"/>
+  </circle>
+  <circle class="pulse" r="4" fill="#1d9bf0" opacity="0.65">
+    <animateMotion dur="9s" begin="2.5s" repeatCount="indefinite" path="M1000 310 H600 V260 H410"/>
+  </circle>
+  <circle class="pulse" r="3" fill="#e8c547" opacity="0.7">
+    <animateMotion dur="5s" begin="1s" repeatCount="indefinite" path="M410 230 H520"/>
   </circle>
 
   <line x1="0" y1="499" x2="1500" y2="499" stroke="#2f3336" stroke-width="2"/>
